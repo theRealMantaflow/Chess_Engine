@@ -8,9 +8,9 @@
 
 class MainBoard {
     
-    Bitboard white;
-    Bitboard black;
-    bool isCheck;
+    Bitboard mWhite;
+    Bitboard mBlack;
+    bool     mIsCheck;
 
     // The function is used to remove pieces from a board;
     uint64_t removeHelper(uint64_t, int, int);
@@ -21,13 +21,17 @@ class MainBoard {
 
     // Converts the coordinates from string notation to frow, fcol, trow, tcol
     // Expects the custom notation (not the standard algebraic notation)
-    std::array<int,4> MainBoard::coordinateParser(std::string_view move);
+    std::array<int,4> coordinateParser(std::string_view move);
 
     // Returns the state of the whole board, just showing if a square is occupied or not
     uint64_t wholeBoard();
 
     // To see if the specified king is in check
     bool verifyCheck(bool); 
+
+    // Checks if the specified color can castle or not.
+    // Updates the mCanCastle variable in Bitboard.
+    void checkCastle(bool);
 
     // Provides the squares the knight can visit, from a specified square (row, col)
     // -1 indicates the move is invalid

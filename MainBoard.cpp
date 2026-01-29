@@ -3,16 +3,12 @@
 #include "MainBoard.hh"
 
 MainBoard::MainBoard(){
-    white   = new Bitboard();
-    black   = new Bitboard(false);
-    isCheck = false;
+    mWhite      = Bitboard(true, true);
+    mBlack      = Bitboard(false, true);
+    mIsCheck    = false;
 }
 
-MainBoard::MainBoard(Bitboard& rwhite, Bitboard& rblack, bool isCheck = false) {
-    white     = rwhite; 
-    black     = rblack;
-    this->isCheck   = isCheck;
-}
+MainBoard::MainBoard(Bitboard& rwhite, Bitboard& rblack, bool isCheck = false) : mWhite(rwhite), mBlack(rblack), mIsCheck(isCheck) {}
 
 //////////////////////
 // THIS IS AN IMPORTANT FUNCTION TO IMPLEMENT
@@ -23,7 +19,7 @@ bool MainBoard::verifyCheck(bool isWhite=true) {
 //////////////////////
 
 uint64_t MainBoard::wholeBoard(){
-    return white.getAll() | black.getAll();
+    return mWhite.getAll() | mBlack.getAll();
 }
 
 bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int fcol, int trow, int tcol) {
@@ -67,22 +63,22 @@ bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int
 
     // deleting the "captured piece"; Make sure to add legality checking (eg. if the move results in a check) later
     if ( *b_v >> (trow*8+tcol) & 0x1ULL ) {
-        black.setBishops( removeHelper(*b_v, trow, tcol) );
+        mBlack.setBishops( removeHelper(*b_v, trow, tcol) );
 
     } else if ( *k_v >> (trow*8+tcol) & 0x1ULL ) {
-        black.setKnights( removeHelper(*k_v, trow, tcol) );
+        mBlack.setKnights( removeHelper(*k_v, trow, tcol) );
         
     } else if ( *r_v >> (trow*8+tcol) & 0x1ULL ) {
-        black.setRooks( removeHelper(*r_v, trow, tcol) );
+        mBlack.setRooks( removeHelper(*r_v, trow, tcol) );
         
     } else if ( *q_v >> (trow*8+tcol) & 0x1ULL ) {
-        black.setQueens( removeHelper(*q_v, trow, tcol) );
+        mBlack.setQueens( removeHelper(*q_v, trow, tcol) );
         
     }  else if ( *kg_v >> (trow*8+tcol) & 0x1ULL ) {
-        black.setKing( removeHelper(*kg_v, trow, tcol) );
+        mBlack.setKing( removeHelper(*kg_v, trow, tcol) );
         
     }  else if ( *p_v >> (trow*8+tcol) & 0x1ULL ) {
-        black.setPawns( removeHelper(*p_v, trow, tcol) );
+        mBlack.setPawns( removeHelper(*p_v, trow, tcol) );
 
     } else {
         return false;
@@ -127,10 +123,9 @@ uint64_t MainBoard::moveHelper(uint64_t bboard, int frow, int fcol, int trow, in
 
 void MainBoard::makeMove(std::string_view move, bool isWhite) {
     
-try {
     char piece = move[0];
-    auto &turn = (isWhite)?white:black;
-    auto &other = (isWhite)?black:white;
+    auto &turn = (isWhite)?mWhite:mBlack;
+    auto &other = (isWhite)?mBlack:mWhite;
     // int sz = move.length();
     
     if ( piece == 'N') {
@@ -204,16 +199,33 @@ try {
 
         if ( move.find('x') != std::string::npos ) { 
 
-            if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) throw "Illegal move or invalid input";
+            if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) throw "Illegal move or invalid input"; else turn.mCanCastle=false;
 
         } else {
             
             turn.setKing( moveHelper(*turn.getKing(), cord[0], cord[1], cord[2], cord[3]) );
+            turn.mCanCastle=false;
 
         }
 
     } else if ( piece == 'OO' ) {
+
         // prevent castle through check, castle into check, etc.
+
+        if ( turn.mCanCastle ) {
+
+            if ( isWhite ) {
+
+                
+
+            } else {
+
+            }
+
+        } else {
+            throw "Castling illegal";
+        }
+
     } else if ( piece == 'OOO' ) {
         //
     }  else if ( piece >= 'a' || piece <= 'h' ) {
@@ -221,13 +233,29 @@ try {
     } else {
         // 
     }
-} catch (std::string_view er) {
-    
-}
 
 }
 
-std::array<int,8> MainBoard::knightMoves (int row, int col){
+void MainBoard::checkCastle(bool isWhite=true) {
+    /* 
+    First check if any pieces are blocking the path of castling.
+    Then check if the king appears on the vision of any piece. 
+    If it does, check if other pieces are blocking the vision.
+    If that passes, check if the king castles into check.
+    After these checks are done and passed, set the mCanCastle variable to true. 
+    If it doesn't pass, set the variable to false and return;
+    */
+    if ( isWhite && mWhite.mCanCastle ) {
+        
+    } else if ( !isWhite && mBlack.mCanCastle ) {
+        
+    } else {
+        throw (isWhite ? "White" : "Black") + std::string(" cannot castle!");
+    }
+
+}
+
+std::array<int,8> MainBoard::knightMoves(int row, int col){
 
     std::array<int,8> positions = {
         ( row+1 <  8 && col+2 <  8 ) ? (row+1)*8 + (col+2) : -1, 
@@ -243,18 +271,18 @@ std::array<int,8> MainBoard::knightMoves (int row, int col){
     return positions;
 }
 
-std::array<int,13> MainBoard::bishopMoves (int row, int col){
+std::array<int,13> MainBoard::bishopMoves(int row, int col){
     //
 }
 
-std::array<int,14> MainBoard::rookMoves (int row, int col){
+std::array<int,14> MainBoard::rookMoves(int row, int col){
     //
 }
 
-std::array<int,8> MainBoard::kingMoves (int row, int col){
+std::array<int,8> MainBoard::kingMoves(int row, int col){
     //
 }
 
-std::array<int,27> MainBoard::queenMoves (int row, int col){
+std::array<int,27> MainBoard::queenMoves(int row, int col){
     //
 }

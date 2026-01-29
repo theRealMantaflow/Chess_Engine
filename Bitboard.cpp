@@ -4,18 +4,18 @@
 
 #pragma region Constructors
 
-Bitboard::Bitboard() : mIsWhite (true) {
+Bitboard::Bitboard() : mIsWhite (true), mCanCastle(true) {
 
-    mQueens  = 0x100ULL;
     mKing    = 0x8ULL;
-    mRooks   = 0x81ULL;
-    mKnights = 0x42ULL;
-    mBishops = 0x24ULL;
     mPawns   = 0xFF00ULL;
+    mRooks   = 0x81ULL;
+    mQueens  = 0x100ULL;
+    mBishops = 0x24ULL;
+    mKnights = 0x42ULL;
 
 }
 
-Bitboard::Bitboard(bool isWhite) : mIsWhite (isWhite) {
+Bitboard::Bitboard(bool isWhite, bool canCastle=true) : mIsWhite (isWhite), mCanCastle(canCastle) {
 
     if ( mIsWhite ) {
         mQueens     = 0x100ULL;

@@ -6,18 +6,20 @@
 
 class Bitboard {
 
-    bool     mIsWhite;
-    uint64_t mQueens;
     uint64_t mKing;
+    uint64_t mPawns;
     uint64_t mRooks;
+    uint64_t mQueens;
     uint64_t mKnights;
     uint64_t mBishops;
-    uint64_t mPawns;
-
+    
 public:
+    bool     mIsWhite;
+    bool     mCanCastle;
+
     // Default state is white.
     Bitboard();
-    Bitboard(bool);
+    Bitboard(bool, bool);
     // Bitboard (bool, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
     // getters
