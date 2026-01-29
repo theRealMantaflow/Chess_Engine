@@ -236,7 +236,7 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
 
 }
 
-void MainBoard::checkCastle(bool isWhite=true) {
+void MainBoard::checkCastle(bool isWhite=true, bool kingSide) {
     /* 
     First check if any pieces are blocking the path of castling.
     Then check if the king appears on the vision of any piece. 

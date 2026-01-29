@@ -31,7 +31,7 @@ class MainBoard {
 
     // Checks if the specified color can castle or not.
     // Updates the mCanCastle variable in Bitboard.
-    void checkCastle(bool);
+    void checkCastle(bool, bool);
 
     // Provides the squares the knight can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
