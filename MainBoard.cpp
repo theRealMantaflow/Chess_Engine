@@ -3,8 +3,8 @@
 #include "MainBoard.hh"
 
 MainBoard::MainBoard(){
-    mWhite      = Bitboard(true, true);
-    mBlack      = Bitboard(false, true);
+    mWhite      = Bitboard(true, true, true);
+    mBlack      = Bitboard(false, true, true);
     mIsCheck    = false;
 }
 
@@ -167,11 +167,30 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
 
         if ( move.find('x') != std::string::npos ) { 
 
-            if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) throw "Illegal move or invalid input";
+            if ( capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) {}
+            else throw "Illegal move or invalid input";
 
         } else {
 
             turn.setRooks( moveHelper(*turn.getRooks(), cord[0], cord[1], cord[2], cord[3]) );
+
+        }
+
+        if ( isWhite) {
+
+            if ( cord[0]==0 && cord[1]==0 ) {
+                turn.mCanKCastle = false;
+            } else if ( cord[0]==0 && cord[1]==7 ) {
+                turn.mCanQCastle = false;
+            }
+
+        } else {
+
+            if ( cord[0]==7 && cord[1]==0 ) {
+                turn.mCanKCastle = false;
+            } else if ( cord[0]==7 && cord[1]==7 ) {
+                turn.mCanQCastle = false;
+            }
 
         }
 
@@ -199,20 +218,23 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
 
         if ( move.find('x') != std::string::npos ) { 
 
-            if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) throw "Illegal move or invalid input"; else turn.mCanCastle=false;
+            if ( capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) {}
+            else throw "Illegal move or invalid input"; 
 
         } else {
             
             turn.setKing( moveHelper(*turn.getKing(), cord[0], cord[1], cord[2], cord[3]) );
-            turn.mCanCastle=false;
 
         }
+
+        turn.mCanKCastle = false;
+        turn.mCanQCastle = false;
 
     } else if ( piece == 'OO' ) {
 
         // prevent castle through check, castle into check, etc.
 
-        if ( turn.mCanCastle ) {
+        if ( turn.mCanKCastle ) {
 
             if ( isWhite ) {
 
@@ -236,21 +258,60 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
 
 }
 
-void MainBoard::checkCastle(bool isWhite=true, bool kingSide) {
+bool MainBoard::checkCastle(bool isWhite=true, bool kingSide) {
     /* 
-    First check if any pieces are blocking the path of castling.
+    First check if any pieces are blocking the path of castling and if the king is in check.
     Then check if the king appears on the vision of any piece. 
     If it does, check if other pieces are blocking the vision.
     If that passes, check if the king castles into check.
-    After these checks are done and passed, set the mCanCastle variable to true. 
+    After these checks are done and passed, set the castle variable to true.
     If it doesn't pass, set the variable to false and return;
     */
-    if ( isWhite && mWhite.mCanCastle ) {
-        
-    } else if ( !isWhite && mBlack.mCanCastle ) {
+    if ( isWhite ) {
+
+        if ( kingSide && mWhite.mCanKCastle ) {
+
+            auto board = wholeBoard();
+            
+            // 0x6 = 0110
+            if ( !verifyCheck(true) && !(board&0x6ULL) ) {
+
+                // Check if opp.'s knight has vision on castling squares.
+                // if (  )
+
+            } else return false;
+            
+        } else if ( !kingSide && mWhite.mCanQCastle ) {
+            
+            auto board = wholeBoard();
+            
+            // 0x70 = 01110 0000
+            if ( !verifyCheck(true) && !(board&0x70ULL) ) {
+                
+            } else return false;
+            
+        } else {
+            throw "White cannot castle!";
+        }
         
     } else {
-        throw (isWhite ? "White" : "Black") + std::string(" cannot castle!");
+
+        if ( kingSide && mBlack.mCanKCastle ) {
+
+            auto board = wholeBoard();
+
+            if ( !verifyCheck(false) ) {
+                
+            } else return false;
+            
+        } else if ( !kingSide && mBlack.mCanQCastle ) {
+            
+            auto board = wholeBoard();
+            
+        } else {
+            throw "Black cannot castle!";
+        }
+
     }
 
 }
@@ -276,7 +337,29 @@ std::array<int,13> MainBoard::bishopMoves(int row, int col){
 }
 
 std::array<int,14> MainBoard::rookMoves(int row, int col){
-    //
+    constexpr int rows[7] = {1, 2, 3, 4, 5, 6, 7};
+    constexpr int cols[7] = {1, 2, 3, 4, 5, 6, 7};
+
+    std::array<int, 14> out;
+    
+    for (int i = 0; i < 14; i++ ) {
+
+        if ( row+rows[i/2] < 8 ) {
+            out[i] = (row + rows[i/2])*8 + col ;
+            
+        } else if ( col+cols[i/2] < 8 ){
+            out[i] = (row)*8 + col+cols[i/2] ;
+            
+        } else if ( row-rows[i/2] >= 0 ){
+            out[i] = (row - rows[i/2])*8 + col ;
+            
+        } else if ( col-cols[i/2] >= 0 ){
+            out[i] = (row)*8 + col-cols[i/2] ;
+
+        } else {
+            out[i] = -1;
+        }
+    }
 }
 
 std::array<int,8> MainBoard::kingMoves(int row, int col){
@@ -285,4 +368,31 @@ std::array<int,8> MainBoard::kingMoves(int row, int col){
 
 std::array<int,27> MainBoard::queenMoves(int row, int col){
     //
+}
+
+int MainBoard::kingCoord(bool isWhite=true){
+
+    int out=0;
+    
+    if ( isWhite ) {
+        auto t_ = *mWhite.getKing();
+        while ( t_>>1 != 0 ){
+            t_ >>= 1;
+            ++out;
+        }
+    } else {
+        auto t_ = *mBlack.getKing();
+        while ( t_>>1 != 0 ){
+            t_ >>= 1;
+            ++out;
+        }
+    }
+
+    return out;
+}
+
+std::array<int, 1> queensCoord() {
+
+    std::array<int, 1> out;
+    return out;
 }

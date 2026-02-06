@@ -31,7 +31,7 @@ class MainBoard {
 
     // Checks if the specified color can castle or not.
     // Updates the mCanCastle variable in Bitboard.
-    void checkCastle(bool, bool);
+    bool checkCastle(bool, bool);
 
     // Provides the squares the knight can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
@@ -53,8 +53,10 @@ class MainBoard {
     // -1 indicates the move is invalid
     std::array<int,27> queenMoves(int, int);
 
+    // Returns the coordinate of the king
+    int kingCoord(bool);
+
     // Captures a piece present on the victim board, using a piece on the attacker board;
-    // 
     bool capturePiece (Bitboard&, Bitboard&, int, int, int, int);
 
 public:

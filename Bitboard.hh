@@ -15,11 +15,12 @@ class Bitboard {
     
 public:
     bool     mIsWhite;
-    bool     mCanCastle;
+    bool     mCanKCastle;
+    bool     mCanQCastle;
 
     // Default state is white.
     Bitboard();
-    Bitboard(bool, bool);
+    Bitboard(bool, bool, bool);
     // Bitboard (bool, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
     // getters

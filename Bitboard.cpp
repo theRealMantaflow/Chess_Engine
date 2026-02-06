@@ -4,7 +4,7 @@
 
 #pragma region Constructors
 
-Bitboard::Bitboard() : mIsWhite (true), mCanCastle(true) {
+Bitboard::Bitboard() : mIsWhite (true), mCanKCastle(true), mCanQCastle(true) {
 
     mKing    = 0x8ULL;
     mPawns   = 0xFF00ULL;
@@ -15,7 +15,7 @@ Bitboard::Bitboard() : mIsWhite (true), mCanCastle(true) {
 
 }
 
-Bitboard::Bitboard(bool isWhite, bool canCastle=true) : mIsWhite (isWhite), mCanCastle(canCastle) {
+Bitboard::Bitboard(bool isWhite, bool canKCastle=true, bool canQCastle=true) : mIsWhite (isWhite), mCanKCastle(canKCastle), mCanQCastle(canQCastle) {
 
     if ( mIsWhite ) {
         mQueens     = 0x100ULL;
