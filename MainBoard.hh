@@ -23,9 +23,6 @@ class MainBoard {
     // Expects the custom notation (not the standard algebraic notation)
     std::array<int,4> coordinateParser(std::string_view move);
 
-    // Returns the state of the whole board, just showing if a square is occupied or not
-    uint64_t wholeBoard();
-
     // To see if the specified king is in check
     bool verifyCheck(bool); 
 
@@ -35,23 +32,25 @@ class MainBoard {
 
     // Provides the squares the knight can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,8> knightMoves(int, int);
+    std::array<int,8> knightMoves(int, int, bool);
 
     // Provides the squares the bishop can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,13> bishopMoves(int, int);
+    std::array<int,13> bishopMoves(int, int, bool);
 
     // Provides the squares the rook can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,14> rookMoves(int, int);
+    std::array<int,14> rookMoves(int, int, bool);
 
     // Provides the squares the king can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,8> kingMoves(int, int);
+    std::array<int,8> kingMoves(int, int, bool);
 
     // Provides the squares the queen can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,27> queenMoves(int, int);
+    std::array<int,27> queenMoves(int, int, bool);
+
+    std::array<int,4> MainBoard::pawnMoves(int, int, bool);
 
     // Returns the coordinate of the king
     int kingCoord(bool);
@@ -62,6 +61,9 @@ class MainBoard {
 public:
     MainBoard();
     MainBoard(Bitboard&, Bitboard&, bool);
+
+    // Returns the state of the whole board, just showing if a square is occupied or not
+    uint64_t wholeBoard();
     
     // Operations
     /*

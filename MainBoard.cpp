@@ -273,11 +273,82 @@ bool MainBoard::checkCastle(bool isWhite=true, bool kingSide) {
 
             auto board = wholeBoard();
             
-            // 0x6 = 0110
-            if ( !verifyCheck(true) && !(board&0x6ULL) ) {
+            // 0x6 = 0000 0110
+            if ( !(verifyCheck(true) && board&0x6ULL) ) {
 
                 // Check if opp.'s knight has vision on castling squares.
-                // if (  )
+                // we achieve this by assuming white knights are present on the squares (since opp. is black)
+                auto k1 = knightMoves(0, 1, true);
+                auto k2 = knightMoves(0, 2, true);
+
+                for ( const auto &i : k1 ) {
+                    if ( i!=-1 && *mBlack.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : k2 ) {
+                    if ( i!=-1 && *mBlack.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+
+                // check if opp.'s bishop has vision on castling squares.
+                // we achieve this by assuming white bishops are present on the squares (since opp. is black)
+                auto b1 = bishopMoves(0, 1, true);
+                auto b2 = bishopMoves(0, 2, true);
+
+                for ( const auto &i : b1 ) {
+                    if ( i!=-1 && *mBlack.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : b2 ) {
+                    if ( i!=-1 && *mBlack.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+
+                // check if opp.'s rook has vision on castling squares.
+                // we achieve this by assuming white rooks are present on the squares (since opp. is black)
+                auto r1 = rookMoves(0, 1, true);
+                auto r2 = rookMoves(0, 2, true);
+
+                for ( const auto &i : r1 ) {
+                    if ( i!=-1 && *mBlack.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : r2 ) {
+                    if ( i!=-1 && *mBlack.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+
+                // check if opp.'s queen has vision on castling squares.
+                // we achieve this by assuming white queens are present on the squares (since opp. is black)
+                auto q1 = queenMoves(0, 1, true);
+                auto q2 = queenMoves(0, 2, true);
+                
+                for ( const auto &i : q1 ) {
+                    if ( i!=-1 && *mBlack.getQueens() & (1ULL<<i) )
+                    return false;
+                }
+                for ( const auto &i : q2 ) {
+                    if ( i!=-1 && *mBlack.getQueens() & (1ULL<<i) )
+                    return false;
+                }
+                
+                // check if opp.'s pawn has vision on castling squares.
+                // we achieve this by assuming white pawns are present on the squares (since opp. is black)
+                auto p1 = pawnMoves(0, 1, true);
+                auto p2 = pawnMoves(0, 2, true);
+
+                for ( const auto &i : p1 ) {
+                    if ( i!=-1 && *mBlack.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : p2 ) {
+                    if ( i!=-1 && *mBlack.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+
+                mWhite.mCanKCastle = false;
+                mWhite.mCanQCastle = false;
+                return true;
 
             } else return false;
             
@@ -286,37 +357,234 @@ bool MainBoard::checkCastle(bool isWhite=true, bool kingSide) {
             auto board = wholeBoard();
             
             // 0x70 = 01110 0000
-            if ( !verifyCheck(true) && !(board&0x70ULL) ) {
+            if ( !(verifyCheck(true) && board&0x70ULL) ) {
                 
+                auto k1 = knightMoves(0, 5, true);
+                auto k2 = knightMoves(0, 6, true);
+
+                for ( const auto &i : k1 ) {
+                    if ( i!=-1 && *mBlack.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : k2 ) {
+                    if ( i!=-1 && *mBlack.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto b1 = bishopMoves(0, 5, true);
+                auto b2 = bishopMoves(0, 6, true);
+
+                for ( const auto &i : b1 ) {
+                    if ( i!=-1 && *mBlack.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : b2 ) {
+                    if ( i!=-1 && *mBlack.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto r1 = rookMoves(0, 5, true);
+                auto r2 = rookMoves(0, 6, true);
+
+                for ( const auto &i : r1 ) {
+                    if ( i!=-1 && *mBlack.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : r2 ) {
+                    if ( i!=-1 && *mBlack.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto q1 = queenMoves(0, 5, true);
+                auto q2 = queenMoves(0, 6, true);
+                
+                for ( const auto &i : q1 ) {
+                    if ( i!=-1 && *mBlack.getQueens() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : q2 ) {
+                    if ( i!=-1 && *mBlack.getQueens() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto p1 = pawnMoves(0, 5, true);
+                auto p2 = pawnMoves(0, 6, true);
+
+                for ( const auto &i : p1 ) {
+                    if ( i!=-1 && *mBlack.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : p2 ) {
+                    if ( i!=-1 && *mBlack.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+                
+                mWhite.mCanKCastle = false;
+                mWhite.mCanQCastle = false;
+                return true;
+
             } else return false;
             
         } else {
-            throw "White cannot castle!";
+            return false;
         }
-        
+
     } else {
 
         if ( kingSide && mBlack.mCanKCastle ) {
 
             auto board = wholeBoard();
 
-            if ( !verifyCheck(false) ) {
+            if ( !(verifyCheck(false) && board&0x600000000000000ULL) ) {
                 
+                auto k1 = knightMoves(7, 1, false);
+                auto k2 = knightMoves(7, 2, false);
+
+                for ( const auto &i : k1 ) {
+                    if ( i!=-1 && *mWhite.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : k2 ) {
+                    if ( i!=-1 && *mWhite.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto b1 = bishopMoves(7, 1, false);
+                auto b2 = bishopMoves(7, 2, false);
+
+                for ( const auto &i : b1 ) {
+                    if ( i!=-1 && *mWhite.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : b2 ) {
+                    if ( i!=-1 && *mWhite.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto r1 = rookMoves(7, 1, false);
+                auto r2 = rookMoves(7, 2, false);
+
+                for ( const auto &i : r1 ) {
+                    if ( i!=-1 && *mWhite.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : r2 ) {
+                    if ( i!=-1 && *mWhite.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto q1 = queenMoves(7, 1, false);
+                auto q2 = queenMoves(7, 2, false);
+                
+                for ( const auto &i : q1 ) {
+                    if ( i!=-1 && *mWhite.getQueens() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : q2 ) {
+                    if ( i!=-1 && *mWhite.getQueens() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto p1 = pawnMoves(7, 1, false);
+                auto p2 = pawnMoves(7, 2, false);
+
+                for ( const auto &i : p1 ) {
+                    if ( i!=-1 && *mWhite.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : p2 ) {
+                    if ( i!=-1 && *mWhite.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+
+                mBlack.mCanKCastle = false;
+                mBlack.mCanQCastle = false;
+                return true;
+
             } else return false;
             
         } else if ( !kingSide && mBlack.mCanQCastle ) {
             
             auto board = wholeBoard();
+
+            if ( !(verifyCheck(false) && board&0x7000000000000000ULL) ) {
+                
+                auto k1 = knightMoves(7, 5, false);
+                auto k2 = knightMoves(7, 6, false);
+
+                for ( const auto &i : k1 ) {
+                    if ( i!=-1 && *mWhite.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : k2 ) {
+                    if ( i!=-1 && *mWhite.getKnights() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto b1 = bishopMoves(7, 5, false);
+                auto b2 = bishopMoves(7, 6, false);
+
+                for ( const auto &i : b1 ) {
+                    if ( i!=-1 && *mWhite.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : b2 ) {
+                    if ( i!=-1 && *mWhite.getBishops() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto r1 = rookMoves(7, 5, false);
+                auto r2 = rookMoves(7, 6, false);
+
+                for ( const auto &i : r1 ) {
+                    if ( i!=-1 && *mWhite.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : r2 ) {
+                    if ( i!=-1 && *mWhite.getRooks() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto q1 = queenMoves(7, 5, false);
+                auto q2 = queenMoves(7, 6, false);
+                
+                for ( const auto &i : q1 ) {
+                    if ( i!=-1 && *mWhite.getQueens() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : q2 ) {
+                    if ( i!=-1 && *mWhite.getQueens() & (1ULL<<i) )
+                        return false;
+                }
+
+                auto p1 = pawnMoves(7, 5, false);
+                auto p2 = pawnMoves(7, 6, false);
+
+                for ( const auto &i : p1 ) {
+                    if ( i!=-1 && *mWhite.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+                for ( const auto &i : p2 ) {
+                    if ( i!=-1 && *mWhite.getPawns() & (1ULL<<i) )
+                        return false;
+                }
+                
+                mBlack.mCanKCastle = false;
+                mBlack.mCanQCastle = false;
+                return true;
+
+            } else return false;
             
         } else {
-            throw "Black cannot castle!";
+            return false;
         }
 
     }
 
 }
 
-std::array<int,8> MainBoard::knightMoves(int row, int col){
+#pragma region "Piece Legal Moves"
+std::array<int,8> MainBoard::knightMoves(int row, int col, bool isWhite=true){
 
     std::array<int,8> positions = {
         ( row+1 <  8 && col+2 <  8 ) ? (row+1)*8 + (col+2) : -1, 
@@ -329,14 +597,52 @@ std::array<int,8> MainBoard::knightMoves(int row, int col){
         ( row-2 >= 0 && col-1 >= 0 ) ? (row-2)*8 + (col-1) : -1
     };
 
+    for ( auto &i : positions ) {
+        if (isWhite) {
+            if ( i!=-1 && mWhite.getAll() & (1ULL << i) )
+                i=-1;
+        } else {
+            if ( i!=-1 && mBlack.getAll() & (1ULL << i) )
+                i=-1;
+        }
+    }
+
     return positions;
 }
 
-std::array<int,13> MainBoard::bishopMoves(int row, int col){
-    //
+std::array<int,13> MainBoard::bishopMoves(int row, int col, bool isWhite=true){
+    std::array<int, 13> out;
+    out.fill(-1); 
+
+    int index = 0;
+    
+    // NW, NE, SW, SE
+    int directions[4][2] = { {1,1}, {1,-1}, {-1,1}, {-1,-1} };
+    
+    for (auto &dir : directions) {
+        for (int dist = 1; dist <= 7; dist++) {
+            int nr = row + dir[0] * dist;
+            int nc = col + dir[1] * dist;
+            
+            // Edge check
+            if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8)
+                break;
+
+            auto t = nr*8 + nc;
+            if (isWhite) {
+                if ( mWhite.getAll() & (1ULL << t) )
+                    break;
+            } else {
+                if ( mBlack.getAll() & (1ULL << t) )
+                    break;
+            }
+            
+            out[index++] = t;
+        }
+    }
 }
 
-std::array<int,14> MainBoard::rookMoves(int row, int col){
+std::array<int,14> MainBoard::rookMoves(int row, int col, bool isWhite=true){
 
     std::array<int, 14> out;
     out.fill(-1); 
@@ -348,25 +654,35 @@ std::array<int,14> MainBoard::rookMoves(int row, int col){
     
     for (auto &dir : directions) {
         for (int dist = 1; dist <= 7; dist++) {
-            int newRow = row + dir[0] * dist;
-            int newCol = col + dir[1] * dist;
+            int nr = row + dir[0] * dist;
+            int nc = col + dir[1] * dist;
             
             // Edge check
-            if (newRow < 0 || newRow >= 8 || newCol < 0 || newCol >= 8)
+            if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8)
                 break;
+
+            auto t = nr*8 + nc;
+            if (isWhite) {
+                if ( mWhite.getAll() & (1ULL << t) )
+                    break;
+            } else {
+                if ( mBlack.getAll() & (1ULL << t) )
+                    break;
+            }
             
-            out[index++] = newRow * 8 + newCol;
+            out[index++] = t;
         }
     }
     
     return out;
 }
 
-std::array<int,8> MainBoard::kingMoves(int row, int col){
+std::array<int,8> MainBoard::kingMoves(int row, int col, bool isWhite=true){
 
-    int i = 0;
     std::array<int,8> out;
     out.fill(-1);
+    
+    int index = 0;
 
     // N, NW, NE, W, E, S, SW, SE
     int directions[8][2] = { {1,0}, {1,1}, {1,-1}, {0,1}, {0,-1}, {-1,0}, {-1,1}, {-1,-1} };
@@ -378,19 +694,23 @@ std::array<int,8> MainBoard::kingMoves(int row, int col){
         
         if ( nr < 0 || nr >= 8 || nc < 0 || nc >= 8 )
             continue;
-
+        
         auto t = nr*8 + nc;
-
-        if ( wholeBoard() >> t ) {
-            
+        if (isWhite) {
+            if ( mWhite.getAll() & (1ULL << t) )
+                continue;
+        } else {
+            if ( mBlack.getAll() & (1ULL << t) )
+                continue;
         }
-        out[i++] = t;
+        
+        out[index++] = t;
     }
 
     return out;
 }
 
-std::array<int,27> MainBoard::queenMoves(int row, int col){
+std::array<int,27> MainBoard::queenMoves(int row, int col, bool isWhite=true){
     
     std::array<int,27> out;
     out.fill(-1);
@@ -402,19 +722,115 @@ std::array<int,27> MainBoard::queenMoves(int row, int col){
     
     for (auto &dir : directions) {
         for (int dist = 1; dist <= 7; dist++) {
-            int newRow = row + dir[0] * dist;
-            int newCol = col + dir[1] * dist;
+
+            int nr = row + dir[0] * dist;
+            int nc = col + dir[1] * dist;
             
             // Edge check
-            if (newRow < 0 || newRow >= 8 || newCol < 0 || newCol >= 8)
+            if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8)
                 break;
             
-            out[index++] = newRow * 8 + newCol;
+            auto t = nr*8 + nc;
+            if (isWhite) {
+                if ( mWhite.getAll() & (1ULL << t) )
+                    break;
+            } else {
+                if ( mBlack.getAll() & (1ULL << t) )
+                    break;
+            }
+            
+            out[index++] = t;
         }
     }
     
     return out;
 }
+
+std::array<int,4> MainBoard::pawnMoves(int row, int col, bool isWhite=true){
+    
+    std::array<int,4> out;
+    out.fill(-1);
+    
+    int index = 0;
+    auto board = wholeBoard();
+    
+    if (isWhite) {
+        
+        // Off you march a row, little soldier
+        if (row + 1 < 8) {
+            int t = (row + 1) * 8 + col;
+            if (!(board & (1ULL << t))) {  
+                out[index++] = t;
+                
+                // Two squares forward from starting position
+                if (row == 1 && index > 0) {  // Only if one-square move was valid
+                    int t2 = (row + 2) * 8 + col;
+                    if (!(board & (1ULL << t2))) {
+                        out[index++] = t2;
+                    }
+                }
+            }
+        }
+        
+        // captures
+        if (row + 1 < 8) {
+            // Capture left diag
+            if (col - 1 >= 0) {
+                int t = (row + 1) * 8 + (col - 1);
+                if (mBlack.getAll() & (1ULL << t)) {
+                    out[index++] = t;
+                }
+            }
+            // Capture right diag
+            if (col + 1 < 8) {
+                int t = (row + 1) * 8 + (col + 1);
+                if (mBlack.getAll() & (1ULL << t)) {
+                    out[index++] = t;
+                }
+            }
+        }
+        
+    } else {
+        // Black moves DOWN the board
+        
+        // March on niggesh
+        if (row - 1 >= 0) {
+            int t = (row - 1) * 8 + col;
+            if (!(board & (1ULL << t))) {
+                out[index++] = t;
+                
+                // Two squares forward from starting position
+                if (row == 6 && index > 0) {
+                    int t2 = (row - 2) * 8 + col;
+                    if (!(board & (1ULL << t2))) {
+                        out[index++] = t2;
+                    }
+                }
+            }
+        }
+        
+        // Diagonal captures
+        if (row - 1 >= 0) {
+            // Capture left diagonal
+            if (col - 1 >= 0) {
+                int t = (row - 1) * 8 + (col - 1);
+                if (mWhite.getAll() & (1ULL << t)) {
+                    out[index++] = t;
+                }
+            }
+            // Capture right diagonal
+            if (col + 1 < 8) {
+                int t = (row - 1) * 8 + (col + 1);
+                if (mWhite.getAll() & (1ULL << t)) {
+                    out[index++] = t;
+                }
+            }
+        }
+    }
+    
+    return out;
+}
+#pragma endregion
 
 int MainBoard::kingCoord(bool isWhite=true){
 
