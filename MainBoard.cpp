@@ -337,37 +337,83 @@ std::array<int,13> MainBoard::bishopMoves(int row, int col){
 }
 
 std::array<int,14> MainBoard::rookMoves(int row, int col){
-    constexpr int rows[7] = {1, 2, 3, 4, 5, 6, 7};
-    constexpr int cols[7] = {1, 2, 3, 4, 5, 6, 7};
 
     std::array<int, 14> out;
+    out.fill(-1); 
+
+    int index = 0;
     
-    for (int i = 0; i < 14; i++ ) {
-
-        if ( row+rows[i/2] < 8 ) {
-            out[i] = (row + rows[i/2])*8 + col ;
+    // N, S, W, E
+    int directions[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+    
+    for (auto &dir : directions) {
+        for (int dist = 1; dist <= 7; dist++) {
+            int newRow = row + dir[0] * dist;
+            int newCol = col + dir[1] * dist;
             
-        } else if ( col+cols[i/2] < 8 ){
-            out[i] = (row)*8 + col+cols[i/2] ;
+            // Edge check
+            if (newRow < 0 || newRow >= 8 || newCol < 0 || newCol >= 8)
+                break;
             
-        } else if ( row-rows[i/2] >= 0 ){
-            out[i] = (row - rows[i/2])*8 + col ;
-            
-        } else if ( col-cols[i/2] >= 0 ){
-            out[i] = (row)*8 + col-cols[i/2] ;
-
-        } else {
-            out[i] = -1;
+            out[index++] = newRow * 8 + newCol;
         }
     }
+    
+    return out;
 }
 
 std::array<int,8> MainBoard::kingMoves(int row, int col){
-    //
+
+    int i = 0;
+    std::array<int,8> out;
+    out.fill(-1);
+
+    // N, NW, NE, W, E, S, SW, SE
+    int directions[8][2] = { {1,0}, {1,1}, {1,-1}, {0,1}, {0,-1}, {-1,0}, {-1,1}, {-1,-1} };
+
+    for ( auto &dir : directions ) {
+
+        int nr = row+dir[0];
+        int nc = dir[1]+col;
+        
+        if ( nr < 0 || nr >= 8 || nc < 0 || nc >= 8 )
+            continue;
+
+        auto t = nr*8 + nc;
+
+        if ( wholeBoard() >> t ) {
+            
+        }
+        out[i++] = t;
+    }
+
+    return out;
 }
 
 std::array<int,27> MainBoard::queenMoves(int row, int col){
-    //
+    
+    std::array<int,27> out;
+    out.fill(-1);
+    
+    int index = 0;
+    
+    // N, NW, NE, W, E, S, SW, SE
+    int directions[8][2] = { {1,0}, {1,1}, {1,-1}, {0,1}, {0,-1}, {-1,0}, {-1,1}, {-1,-1} };
+    
+    for (auto &dir : directions) {
+        for (int dist = 1; dist <= 7; dist++) {
+            int newRow = row + dir[0] * dist;
+            int newCol = col + dir[1] * dist;
+            
+            // Edge check
+            if (newRow < 0 || newRow >= 8 || newCol < 0 || newCol >= 8)
+                break;
+            
+            out[index++] = newRow * 8 + newCol;
+        }
+    }
+    
+    return out;
 }
 
 int MainBoard::kingCoord(bool isWhite=true){
