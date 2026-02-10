@@ -4,13 +4,16 @@
 
 #include "bitboard.hh"
 #include <array>
+#include <string_view>
 #include <string>
+#include <stdexcept>
 
 class MainBoard {
     
     Bitboard mWhite;
     Bitboard mBlack;
     bool     mIsCheck;
+    int      mEnPassantLoc;
 
     // The function is used to remove pieces from a board;
     uint64_t removeHelper(uint64_t, int, int);
@@ -24,43 +27,43 @@ class MainBoard {
     std::array<int,4> coordinateParser(std::string_view move);
 
     // To see if the specified king is in check
-    bool verifyCheck(bool); 
+    bool verifyCheck(bool=true); 
 
     // Checks if the specified color can castle or not.
-    // Updates the mCanCastle variable in Bitboard.
+    // Will forcefully update the mCanCastle series of variables if the castling rook is not present
     bool checkCastle(bool, bool);
 
     // Provides the squares the knight can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,8> knightMoves(int, int, bool);
+    std::array<int,8> knightMoves(int, int, bool=true);
 
     // Provides the squares the bishop can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,13> bishopMoves(int, int, bool);
+    std::array<int,13> bishopMoves(int, int, bool=true);
 
     // Provides the squares the rook can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,14> rookMoves(int, int, bool);
+    std::array<int,14> rookMoves(int, int, bool=true);
 
     // Provides the squares the king can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,8> kingMoves(int, int, bool);
+    std::array<int,8> kingMoves(int, int, bool=true);
 
     // Provides the squares the queen can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
-    std::array<int,27> queenMoves(int, int, bool);
+    std::array<int,27> queenMoves(int, int, bool=true);
 
-    std::array<int,4> MainBoard::pawnMoves(int, int, bool);
+    std::array<int,4> pawnMoves(int, int, bool=true);
 
     // Returns the coordinate of the king
-    int kingCoord(bool);
+    int kingCoord(bool=true);
 
     // Captures a piece present on the victim board, using a piece on the attacker board;
     bool capturePiece (Bitboard&, Bitboard&, int, int, int, int);
 
 public:
     MainBoard();
-    MainBoard(Bitboard&, Bitboard&, bool);
+    MainBoard(Bitboard&, Bitboard&, bool, int);
 
     // Returns the state of the whole board, just showing if a square is occupied or not
     uint64_t wholeBoard();
@@ -69,19 +72,16 @@ public:
     /*
     *
     * This function DOES NOT care about #, and +.
-    * It only considers castling, pawn push, captures, and promotions.
-    *                       Simple ones: 
-    * Nf3           -> Move knight to f3.
-    * Nxf3          -> Move knight to f3, while cutting the piece that is currently on it.
-    * Nf3+          -> Move the knight to f3, while delivering a check.
-    * Nf3#          -> Move the knight to f3, while delivering a checkmate.
-    * e4            -> Pawn movements
-    * e8=Q/N/B/R    -> Promotions to queen/knight/bishop/rook.
-    * OOO/OO        -> Castle Queen/King side.
-    *                       Complex Ones:
-    * Description: This is mainly when two or more of same pieces can move to the same square (eg. 2+ knights, 
-    * 2+ bishops of same color, 2+ queens/rooks). 
-    * There is a hierarchy to this, which can be learnt on wikipedia https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Disambiguating_moves.
+    * It only considers castling, pawn push, captures, promotions, en passants.
+    * 
+    * `Ng1f3` - Move knight on g1 to f3.
+    * `Ng1xf3` - Capture piece on f3 with knight on g1.
+    * `Nd4f3` - Move knigh on d4 to f3, delivering check ('+' symbol NOT required).
+    * `Nd4f3` - Move knight on d4 to f3, delivering checkmate ('#' symbol NOT required).
+    * `e3e4` - Pawn move to e4.
+    * `e7e8=Q` - Pawn promotion to queen (also N, B, R for knight, bishop, rook).
+    * `OO` - King-side castling.
+    * `OOO` - Queen-side castling.
     * 
     */
     void makeMove(std::string_view, bool);

@@ -44,19 +44,22 @@ This project implements a chess engine with the following key components:
 
 ## Supported Move Notation
 
-The engine supports modified standard chess algebraic notation:
+The engine uses a coordinate-based notation system that simplifies move parsing and eliminates disambiguation issues:
 
-### Simple Moves
-- `g1Nf3` - Move knight on g1 to f3.
-- `g1Nxf3` - Capture piece on f3 with knight on g1.
-- `d4Nf3+` - Move knigh on d4 to f3, delivering check.
-- `d4Nf3#` - Move knight on d4 to f3, delivering checkmate.
-- `e3e4` - Pawn move to e4.
-- `e7e8=Q` - Pawn promotion to queen (also N, B, R for knight, bishop, rook).
-- `OO` - King-side castling.
-- `OOO` - Queen-side castling.
+### Move Format
+- `Ng1f3` - Move knight from g1 to f3
+- `Ng1xf3` - Capture piece on f3 with knight from g1
+- `e3e4` - Pawn move from e3 to e4
+- `e7e8=Q` - Pawn promotion to queen on e8 (also N, B, R for knight, bishop, rook)
+- `OO` - King-side castling
+- `OOO` - Queen-side castling
 
-This modified notation is followed to make the moving process much simpler to handle, and also to eleminate the problem of disambiguating moves [Wikipedia: Disambiguating Moves](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Disambiguating_moves).
+### Special Features
+- **En Passant**: Automatically handled in pawn move logic with `mEnPassantLoc` tracking
+- **Check/Checkmate**: `+` and `#` symbols are NOT required in notation (handled internally)
+- **Disambiguation**: Fully qualified notation (piece origin and destination) eliminates all ambiguity
+
+This notation format simplifies move handling and avoids the complexity of disambiguating moves as described in [Wikipedia's Algebraic Notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Disambiguating_moves).
 
 ## Files
 
@@ -87,29 +90,34 @@ g++ -std=c++17 -o test_chess test.cpp Bitboard.cpp MainBoard.cpp
 The engine provides a `makeMove()` function to update the board state:
 
 ```cpp
-MainBoard board;
-board.makeMove("e4", true);      // White plays e4
-board.makeMove("e5", false);     // Black plays e5
-board.makeMove("Nf3", true);     // White plays Nf3
+MainBoard board;  // Creates a new game with initial position
+board.makeMove("e2e4", true);    // White pawn e2 to e4
+board.makeMove("e7e5", false);   // Black pawn e7 to e5
+board.makeMove("Ng1f3", true);   // White knight from g1 to f3
+board.makeMove("Nb8c6", false);  // Black knight from b8 to c6
 ```
 
 ## Implementation Details
 
 ### Move Calculation
 Each piece type has dedicated movement calculation methods:
-- `knightMoves(row, col)` - Returns array of 8 possible knight moves
-- `bishopMoves(row, col)` - Returns array of 13 possible bishop moves
-- `rookMoves(row, col)` - Returns array of 14 possible rook moves
-- `kingMoves(row, col)` - Returns array of 8 possible king moves
-- `queenMoves(row, col)` - Returns array of 27 possible queen moves
+- `knightMoves(row, col, isWhite)` - Returns array of 8 possible knight moves
+- `bishopMoves(row, col, isWhite)` - Returns array of 13 possible bishop moves
+- `rookMoves(row, col, isWhite)` - Returns array of 14 possible rook moves
+- `kingMoves(row, col, isWhite)` - Returns array of 8 possible king moves
+- `queenMoves(row, col, isWhite)` - Returns array of 27 possible queen moves
+- `pawnMoves(row, col, isWhite)` - Returns array of 4 possible pawn moves (including en passant)
 
+All methods take an `isWhite` parameter (defaults to `true`) to determine which pieces can be moved to.
 Invalid moves are marked with `-1` in the returned arrays.
 
 ### Board State
-- Uses `coordinateParser()` to convert move notation to board coordinates
-- `wholeBoard()` method returns a combined bitboard of all occupied squares
-- `verifyCheck()` determines if a king is in check
-- `checkCastle()` validates castling legality and updates castling rights
+- **Move Parsing**: `coordinateParser()` converts coordinate notation to array indices (frow, fcol, trow, tcol)
+- **Board Occupancy**: `wholeBoard()` returns a combined bitboard of all occupied squares
+- **Check Detection**: `verifyCheck(isWhite)` determines if a king is in check
+- **Castling Validation**: `checkCastle(isWhite, kingSide)` validates castling legality and updates castling rights
+- **En Passant**: `mEnPassantLoc` tracks en passant capture opportunity (-1 if none available)
+- **Piece Capture**: `capturePiece()` handles piece captures with move legality checking
 
 ## Author
 
