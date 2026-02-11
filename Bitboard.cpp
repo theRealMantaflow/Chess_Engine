@@ -1,6 +1,6 @@
 // Author: Sreeram S Nair (github: realMantaflow)
 
-#include "bitboard.hh"
+#include "Bitboard.hh"
 
 #pragma region Constructors
 
@@ -9,28 +9,29 @@ Bitboard::Bitboard() : mIsWhite (true), mCanKCastle(true), mCanQCastle(true) {
     mKing    = 0x8ULL;
     mPawns   = 0xFF00ULL;
     mRooks   = 0x81ULL;
-    mQueens  = 0x100ULL;
+    mQueens  = 0x10ULL;
     mBishops = 0x24ULL;
     mKnights = 0x42ULL;
 
 }
 
+// IsWhite, canKCastle, canQCastle
 Bitboard::Bitboard(bool isWhite, bool canKCastle=true, bool canQCastle=true) : mIsWhite (isWhite), mCanKCastle(canKCastle), mCanQCastle(canQCastle) {
 
     if ( mIsWhite ) {
-        mQueens     = 0x100ULL;
         mKing       = 0x8ULL;
-        mRooks      = 0x81ULL;
-        mKnights    = 0x42ULL;
-        mBishops    = 0x24ULL;
         mPawns      = 0xFF00ULL;
+        mRooks      = 0x81ULL;
+        mQueens     = 0x10ULL;
+        mBishops    = 0x24ULL;
+        mKnights    = 0x42ULL;
     } else {
-        mQueens     = 0x1000000000000000ULL;
-        mKing       = 0x8000000000000000ULL;
+        mKing       = 0x800000000000000ULL;
+        mPawns      = 0xFF000000000000ULL;
         mRooks      = 0x8100000000000000ULL;
-        mKnights    = 0x4200000000000000ULL;
+        mQueens     = 0x1000000000000000ULL;
         mBishops    = 0x2400000000000000ULL;
-        mPawns      = 0xFF00000000000000ULL;
+        mKnights    = 0x4200000000000000ULL;
     }
 
 }

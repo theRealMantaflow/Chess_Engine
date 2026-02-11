@@ -3,14 +3,17 @@
 #include "MainBoard.hh"
 
 MainBoard::MainBoard(){
-    mBlack       = Bitboard(false, true, true);
-    mWhite       = Bitboard(true, true, true);
-    mIsCheck     = false;
+    mBlack        = Bitboard(false, true, true);
+    mWhite        = Bitboard(true, true, true);
+    mTurn         = true;
+    mIsCheck      = false;
     mEnPassantLoc = -1;
+    mHalfMoves    = 0;
+    mFullMoves    = 1;
 }
 
-MainBoard::MainBoard(Bitboard& rwhite, Bitboard& rblack, bool isCheck, int enPassantLoc) 
-: mWhite(rwhite), mBlack(rblack), mIsCheck(isCheck), mEnPassantLoc(enPassantLoc) {}
+MainBoard::MainBoard(Bitboard& rwhite, Bitboard& rblack, bool isCheck, int enPassantLoc, bool turn, int halfMoves, int fullMoves) 
+: mWhite(rwhite), mBlack(rblack), mIsCheck(isCheck), mEnPassantLoc(enPassantLoc), mTurn(turn), mHalfMoves(halfMoves), mFullMoves(fullMoves) {}
 
 bool MainBoard::verifyCheck(bool isWhite) {
     // Get the king's position
@@ -100,7 +103,7 @@ bool MainBoard::verifyCheck(bool isWhite) {
     return false; // King is not in check
 }
 
-uint64_t MainBoard::wholeBoard(){
+const uint64_t MainBoard::wholeBoard(){
     return mWhite.getAll() | mBlack.getAll();
 }
 
@@ -129,6 +132,7 @@ bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int
         
         if ( verifyCheck(attacker.mIsWhite) ) {
             attacker.setBishops( prev_ );
+            return false;
         }
         
     } else if ( (*k_a >> frmPos) & 0x1ULL ) {
@@ -138,6 +142,7 @@ bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int
 
         if ( verifyCheck(attacker.mIsWhite) ) {
             attacker.setKnights( prev_ );
+            return false;
         }
         
     } else if ( (*r_a >> frmPos) & 0x1ULL ) {
@@ -147,6 +152,7 @@ bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int
 
         if ( verifyCheck(attacker.mIsWhite) ) {
             attacker.setRooks( prev_ );
+            return false;
         }
         
     } else if ( (*q_a >> frmPos) & 0x1ULL ) {
@@ -156,6 +162,7 @@ bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int
 
         if ( verifyCheck(attacker.mIsWhite) ) {
             attacker.setQueens( prev_ );
+            return false;
         }
 
     }  else if ( (*kg_a >> frmPos) & 0x1ULL ) {
@@ -165,6 +172,7 @@ bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int
         
         if ( verifyCheck(attacker.mIsWhite) ) {
             attacker.setKing( prev_ );
+            return false;
         }
         
     }  else if ( (*p_a >> frmPos) & 0x1ULL ) {
@@ -173,6 +181,7 @@ bool MainBoard::capturePiece(Bitboard &attacker, Bitboard &victim, int frow, int
         attacker.setPawns( moveHelper(*p_a, frow, fcol, trow, tcol) );
         if ( verifyCheck(attacker.mIsWhite) ) {
             attacker.setPawns( prev_ );
+            return false;
         }
         
     } else {
@@ -231,9 +240,9 @@ std::array<int,4> MainBoard::coordinateParser(std::string_view move) {
 
     std::array<int,4> out {
         from[1]-'1',
-        abs(from[0]-'h'),
+        -(from[0]-'h'),
         to[1]-'1',
-        abs(to[0]-'h')
+        -(to[0]-'h')
     };
 
     return out;
@@ -266,10 +275,12 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
         if ( move.find('x') != std::string::npos ) { 
 
             if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) throw std::runtime_error("Illegal move or invalid input");
+            mHalfMoves = 0;  // Reset halfmove clock on capture
 
         } else {
 
             turn.setKnights( moveHelper(*turn.getKnights(), cord[0], cord[1], cord[2], cord[3]) );
+            ++mHalfMoves;  // Increment halfmove clock
         }
         mEnPassantLoc = -1;
 
@@ -282,10 +293,12 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
         if ( move.find('x') != std::string::npos ) { 
 
             if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) throw std::runtime_error("Illegal move or invalid input");
+            mHalfMoves = 0;  // Reset halfmove clock on capture
 
         } else {
             
             turn.setBishops( moveHelper(*turn.getBishops(), cord[0], cord[1], cord[2], cord[3]) );
+            ++mHalfMoves;  // Increment halfmove clock
 
         }
         mEnPassantLoc = -1;
@@ -300,10 +313,12 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
 
             if ( capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) {}
             else throw std::runtime_error("Illegal move or invalid input");
+            mHalfMoves = 0;  // Reset halfmove clock on capture
 
         } else {
 
             turn.setRooks( moveHelper(*turn.getRooks(), cord[0], cord[1], cord[2], cord[3]) );
+            ++mHalfMoves;  // Increment halfmove clock
 
         }
 
@@ -336,10 +351,12 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
         if ( move.find('x') != std::string::npos ) { 
 
             if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) throw std::runtime_error("Illegal move or invalid input");
+            mHalfMoves = 0;  // Reset halfmove clock on capture
 
         } else {
             
             turn.setQueens( moveHelper(*turn.getQueens(), cord[0], cord[1], cord[2], cord[3]) );
+            ++mHalfMoves;  // Increment halfmove clock
 
         }
         mEnPassantLoc = -1;
@@ -354,10 +371,12 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
 
             if ( capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) {}
             else throw std::runtime_error("Illegal move or invalid input");
+            mHalfMoves = 0;  // Reset halfmove clock on capture
 
         } else {
             
             turn.setKing( moveHelper(*turn.getKing(), cord[0], cord[1], cord[2], cord[3]) );
+            ++mHalfMoves;  // Increment halfmove clock
 
         }
 
@@ -453,7 +472,7 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
                 if ( !capturePiece(turn, other, cord[0], cord[1], cord[2], cord[3]) ) 
                     throw std::runtime_error("Illegal pawn capture");
             }
-            
+            mHalfMoves = 0;  // Reset halfmove clock on any pawn capture
             
         } else {
             
@@ -469,6 +488,7 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
             }
             
             turn.setPawns( moveHelper(*turn.getPawns(), cord[0], cord[1], cord[2], cord[3]) );
+            mHalfMoves = 0;  // Reset halfmove clock on any pawn move
         }
         
         // promotions
@@ -498,10 +518,16 @@ void MainBoard::makeMove(std::string_view move, bool isWhite) {
     } else {
         throw std::runtime_error("Invalid move notation");
     }
+    
+    // Update turn and fullmove counter for all move types
+    if (!isWhite) {
+        ++mFullMoves;
+    }
+    mTurn = !isWhite;
 
 }
 
-bool MainBoard::checkCastle(bool isWhite=true, bool kingSide) {
+bool MainBoard::checkCastle(bool isWhite, bool kingSide) {
     /* 
     First check if any pieces are blocking the path of castling and if the king is in check.
     Then check if the king appears on the vision of any piece, on the castling squares. 
@@ -1106,4 +1132,86 @@ int MainBoard::kingCoord(bool isWhite){
     }
 
     return out;
+}
+
+std::string MainBoard::generateFEN() {
+    std::string fen;
+    
+    // Generate board position (iterate from rank 7 down to rank 0, left to right)
+    for (int row = 7; row >= 0; --row) {
+        int emptyCount = 0;
+        
+        for (int col = 7; col >= 0; --col) {
+            int index = row * 8 + col;
+            uint64_t mask = 1ULL << index;
+            char piece = ' ';
+            
+            // Check white pieces
+            if (*mWhite.getKing() & mask) piece = 'K';
+            else if (*mWhite.getQueens() & mask) piece = 'Q';
+            else if (*mWhite.getRooks() & mask) piece = 'R';
+            else if (*mWhite.getBishops() & mask) piece = 'B';
+            else if (*mWhite.getKnights() & mask) piece = 'N';
+            else if (*mWhite.getPawns() & mask) piece = 'P';
+            // Check black pieces
+            else if (*mBlack.getKing() & mask) piece = 'k';
+            else if (*mBlack.getQueens() & mask) piece = 'q';
+            else if (*mBlack.getRooks() & mask) piece = 'r';
+            else if (*mBlack.getBishops() & mask) piece = 'b';
+            else if (*mBlack.getKnights() & mask) piece = 'n';
+            else if (*mBlack.getPawns() & mask) piece = 'p';
+            
+            if (piece != ' ') {
+                // Flush empty count if any
+                if (emptyCount > 0) {
+                    fen += std::to_string(emptyCount);
+                    emptyCount = 0;
+                }
+                fen += piece;
+            } else {
+                emptyCount++;
+            }
+        }
+        
+        // Flush remaining empty count
+        if (emptyCount > 0) {
+            fen += std::to_string(emptyCount);
+        }
+        
+        // Add rank separator (except after last rank)
+        if (row > 0) {
+            fen += '/';
+        }
+    }
+    
+    // Active color
+    fen += ' ';
+    fen += (mTurn) ? 'w' : 'b';
+    
+    // Castling rights
+    fen += ' ';
+    bool hasCastling = false;
+    if (mWhite.mCanKCastle) { fen += 'K'; hasCastling = true; }
+    if (mWhite.mCanQCastle) { fen += 'Q'; hasCastling = true; }
+    if (mBlack.mCanKCastle) { fen += 'k'; hasCastling = true; }
+    if (mBlack.mCanQCastle) { fen += 'q'; hasCastling = true; }
+    if (!hasCastling) { fen += '-'; }
+    
+    // En passant target square
+    fen += ' ';
+    if (mEnPassantLoc == -1) {
+        fen += '-';
+    } else {
+        int col = mEnPassantLoc % 8;
+        int row = mEnPassantLoc / 8;
+        fen += (char)('h' - col);
+        fen += (char)('1' + row);
+    }
+    
+    // Halfmove clock
+    fen += std::string(" ") + std::to_string(mHalfMoves);
+    // Fullmove number
+    fen += std::string(" ") + std::to_string(mFullMoves);
+    
+    return fen;
 }

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "bitboard.hh"
+#include "Bitboard.hh"
 #include <array>
 #include <string_view>
 #include <string>
@@ -10,9 +10,13 @@
 
 class MainBoard {
     
+    // True -> white
+    bool     mTurn;
     Bitboard mWhite;
     Bitboard mBlack;
     bool     mIsCheck;
+    int      mHalfMoves;
+    int      mFullMoves;
     int      mEnPassantLoc;
 
     // The function is used to remove pieces from a board;
@@ -52,7 +56,9 @@ class MainBoard {
     // Provides the squares the queen can visit, from a specified square (row, col)
     // -1 indicates the move is invalid
     std::array<int,27> queenMoves(int, int, bool=true);
-
+    
+    // Provides the squares the pawn can visit, from a specified square
+    // -1 indicates the move in invalid.
     std::array<int,4> pawnMoves(int, int, bool=true);
 
     // Returns the coordinate of the king
@@ -63,10 +69,13 @@ class MainBoard {
 
 public:
     MainBoard();
-    MainBoard(Bitboard&, Bitboard&, bool, int);
+    MainBoard(Bitboard&, Bitboard&, bool, int, bool, int, int);
 
     // Returns the state of the whole board, just showing if a square is occupied or not
-    uint64_t wholeBoard();
+    const uint64_t wholeBoard();
+
+    // Generates a FEN string from the current board state
+    std::string generateFEN();
     
     // Operations
     /*
