@@ -79,6 +79,14 @@ This notation format simplifies move handling and avoids the complexity of disam
 g++ -std=c++17 -o chess chess.cpp Bitboard.cpp MainBoard.cpp
 ```
 
+### Running Tests
+```bash
+mkdir build
+cd build
+cmake .. -G "Unix Makefiles" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+cmake --build .
+./Chess_Engine.exe
+```
 <!-- ### Running Tests
 ```bash
 g++ -std=c++17 -o test_chess test.cpp Bitboard.cpp MainBoard.cpp
