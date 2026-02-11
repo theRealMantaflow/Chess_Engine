@@ -1,2 +1,3 @@
 *.exe
-./build
+# ignore the build directory
+/build/
